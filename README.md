@@ -6,18 +6,40 @@ Binary parser with a fluent API.
 ## Usage
 
 ```js
-var parse = require('barse');
+var parse = require('..');
 
 var parser = parse()
-  .string('foo', 3)
-  .string('bar', 3)
+  .readUInt8('string length')
+  .string('string', 'string length')
+  .readUInt8('field count')
+  .loop('fields', 2, function (loop) {
+    loop.readUInt8('some');
+    loop.readUInt8('numbers');
+  })
 
 parser.on('data', console.log);
-// => { foo : foo, bar : bar }
+/*
+{
+  "string length" : 3,
+  "string" : "foo",
+  "field count" : 2,
+  "fields" : [
+    { "some" : 13, "numbers" : 37 },
+    { "some" : 73, "numbers" : 13 }
+  ]
+}
+*/
 
-parser.write(new Buffer('fo'));
-parser.write(new Buffer('ob'));
-parser.write(new Buffer('ar'));
+var buf = new Buffer(9);
+buf.writeUInt8(3, 0); // string length
+buf.write('foo', 1); // string
+buf.writeUInt8(2, 4); // field count
+buf.writeUInt8(13, 5); // fields[0].some
+buf.writeUInt8(37, 6); // fields[0].numbers
+buf.writeUInt8(73, 7); // fields[1].some
+buf.writeUInt8(31, 8); // fields[1].numbers
+
+parser.write(buf);
 ```
 
 ## API
@@ -58,6 +80,24 @@ parse()
   .next('bar', 3, function (chunk, offset) {
     return chunk.toString('utf8', offset, offset + 3);
   })
+```
+
+### parse#loop(name, length, fn)
+
+Read `length` buffers and store under `name`.
+
+```js
+var parser = parse()
+  .readUInt8('count')
+  .loop('strings', 'count', function (loop) {
+    loop.string('value', 3);
+  });
+
+parser.on('data', console.log);
+// => { strings : [{ value : 'foo' }, { value : 'bar' }]}
+
+var count = new Buffer(1); count.writeUInt8(1, 0); parser.write(count);
+parser.write(new Buffer('foobar'));
 ```
 
 ## Installation

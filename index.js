@@ -41,8 +41,12 @@ Parser.prototype._transform = function (chunk, encoding, done) {
         }
 
         this.res[step.name] = step.fn(chunk, this.offset);
-        this.offset += step.length;
+        this.offset += stepLength;
         this.idx++;
+
+        if (this.steps[i+1] && typeof this.steps[i+1].length === 'string') {
+          this.steps[i+1].length = this.res[step.name];
+        }
       }
 
       if (i === this.steps.length - 1) {
@@ -76,6 +80,47 @@ Parser.prototype._transform = function (chunk, encoding, done) {
 Parser.prototype.next = function (name, length, fn) {
   this.steps.push({ name : name, length : length, fn : fn });
   return this;
+};
+
+Parser.prototype.loop = function (name, length, fn) {
+  var self = this;
+
+  function newFn (chunk, offset) {
+    // let `fn` create the parser
+    var parse = Parser();
+    fn(parse);
+
+    // parse.on('data') fires synchronously
+    var res = [];
+    parse.on('data', function (data) {
+      res.push(data);
+    });
+
+    // iterations * chunkLength
+    length = step.length * parse.chunkLength();
+
+    // write to the parser
+    var buf = new Buffer(length);
+    chunk.copy(buf, 0, offset, offset + length);
+    parse.write(buf);
+
+    return res;
+  }
+
+  var step = {
+    name : name,
+    length : length, // if string, will be fixed in _transform
+    fn : newFn
+  };
+
+  this.steps.push(step);
+  return this;
+}
+
+Parser.prototype.chunkLength = function () {
+  return this.steps.reduce(function (acc, step) {
+    return acc + step.length;
+  }, 0);
 };
 
 /**
