@@ -26,13 +26,21 @@ parser.write(new Buffer('ar'));
 
 Create a new streaming parser.
 
-### parse#string(name, length)
+### parse#string(name, length[, encoding])
 ### parse#buffer(name, length)
 ### parse#read(U)Int{8,16,32}{BE,LE}(name)
 ### parse#read{Float,Double}{BE,LE}(name)
 
 Parse the given type with optional length and store in the results object under
 `name`.
+
+`length` can also be the name of a previously read field, e.g.:
+
+```js
+parse()
+  .readUInt8('length')
+  .string('content', 'length');
+```
 
 ### parse#next(name, length, fn)
 

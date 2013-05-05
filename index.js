@@ -31,10 +31,15 @@ Parser.prototype._transform = function (chunk, encoding, done) {
     for (var i = 0; i < this.steps.length; i++) {
       var step = this.steps[i];
       if (this.idx == i) {
-        if (chunk.length < step.length + this.offset) {
+        var stepLength = typeof step.length === 'number'
+          ? step.length
+          : this.res[step.length];
+
+        if (chunk.length < stepLength + this.offset) {
           broken = true;
           break;
         }
+
         this.res[step.name] = step.fn(chunk, this.offset);
         this.offset += step.length;
         this.idx++;
@@ -77,100 +82,105 @@ Parser.prototype.next = function (name, length, fn) {
  * API sugar.
  */
 
-Parser.string = function (name, length, encoding) {
-  this.next(name, length, function (chunk, offset) {
+Parser.prototype.string = function (name, length, encoding) {
+  if (!encoding) encoding = 'utf8';
+  var self = this;
+  return self.next(name, length, function (chunk, offset) {
+    if (typeof length === 'string') length = self.res[length];
     return chunk.toString(encoding, offset, offset + length);
   });
 };
 
-Parser.buffer = function (name, length) {
-  this.next(name, length, function (chunk, offset) {
+Parser.prototype.buffer = function (name, length) {
+  var self = this;
+  return self.next(name, length, function (chunk, offset) {
+    if (typeof length === 'string') length = self.res[length];
     var buf = new Buffer(length);
     chunk.copy(buf, 0, offset, offset + length);
     return buf;
   });
 };
 
-Parser.readUInt8 = function (name) {
-  this.next(name, 1, function (chunk, offset) {
+Parser.prototype.readUInt8 = function (name) {
+  return this.next(name, 1, function (chunk, offset) {
     return chunk.readUInt8(offset);
   });
 };
 
-Parser.readUInt16LE = function (name) {
-  this.next(name, 2, function (chunk, offset) {
+Parser.prototype.readUInt16LE = function (name) {
+  return this.next(name, 2, function (chunk, offset) {
     return chunk.readUInt16LE(offset);
   });
 };
 
-Parser.readUInt16BE = function (name) {
-  this.next(name, 2, function (chunk, offset) {
+Parser.prototype.readUInt16BE = function (name) {
+  return this.next(name, 2, function (chunk, offset) {
     return chunk.readUInt16BE(offset);
   });
 };
 
-Parser.readUInt32LE = function (name) {
-  this.next(name, 4, function (chunk, offset) {
+Parser.prototype.readUInt32LE = function (name) {
+  return this.next(name, 4, function (chunk, offset) {
     return chunk.readUInt32LE(offset);
   });
 };
 
-Parser.readUInt32BE = function (name) {
-  this.next(name, 4, function (chunk, offset) {
+Parser.prototype.readUInt32BE = function (name) {
+  return this.next(name, 4, function (chunk, offset) {
     return chunk.readUInt32BE(offset);
   });
 };
 
-Parser.readInt8 = function (name) {
-  this.next(name, 1, function (chunk, offset) {
+Parser.prototype.readInt8 = function (name) {
+  return this.next(name, 1, function (chunk, offset) {
     return chunk.readInt8(offset);
   });
 };
 
-Parser.readInt16LE = function (name) {
-  this.next(name, 2, function (chunk, offset) {
+Parser.prototype.readInt16LE = function (name) {
+  return this.next(name, 2, function (chunk, offset) {
     return chunk.readInt16LE(offset);
   });
 };
 
-Parser.readInt16BE = function (name) {
-  this.next(name, 2, function (chunk, offset) {
+Parser.prototype.readInt16BE = function (name) {
+  return this.next(name, 2, function (chunk, offset) {
     return chunk.readInt16BE(offset);
   });
 };
 
-Parser.readInt32LE = function (name) {
-  this.next(name, 4, function (chunk, offset) {
+Parser.prototype.readInt32LE = function (name) {
+  return this.next(name, 4, function (chunk, offset) {
     return chunk.readInt32LE(offset);
   });
 };
 
-Parser.readInt32BE = function (name) {
-  this.next(name, 4, function (chunk, offset) {
+Parser.prototype.readInt32BE = function (name) {
+  return this.next(name, 4, function (chunk, offset) {
     return chunk.readInt32BE(offset);
   });
 };
 
-Parser.readFloatLE = function (name) {
-  this.next(name, 4, function (chunk, offset) {
+Parser.prototype.readFloatLE = function (name) {
+  return this.next(name, 4, function (chunk, offset) {
     return chunk.readFloatLE(offset);
   });
 };
 
-Parser.readFloatBE = function (name) {
-  this.next(name, 4, function (chunk, offset) {
+Parser.prototype.readFloatBE = function (name) {
+  return this.next(name, 4, function (chunk, offset) {
     return chunk.readFloatBE(offset);
   });
 };
 
-Parser.readDoubleLE = function (name) {
-  this.next(name, 8, function (chunk, offset) {
+Parser.prototype.readDoubleLE = function (name) {
+  return this.next(name, 8, function (chunk, offset) {
     return chunk.readDoubleLE(offset);
   });
 };
 
-Parser.readDoubleBE = function (name) {
-  this.next(name, 8, function (chunk, offset) {
+Parser.prototype.readDoubleBE = function (name) {
+  return this.next(name, 8, function (chunk, offset) {
     return chunk.readDoubleBE(offset);
   });
 };
