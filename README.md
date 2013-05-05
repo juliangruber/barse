@@ -25,7 +25,7 @@ parser.on('data', console.log);
   "field count" : 2,
   "fields" : [
     { "some" : 13, "numbers" : 37 },
-    { "some" : 73, "numbers" : 13 }
+    { "some" : 73, "numbers" : 31 }
   ]
 }
 */
@@ -69,6 +69,7 @@ parse()
 Consume a chunk of binary data with the given `length`.
 
 `fn` is called with the current `chunk` and `offset` and is expected to synchronously return the parsed Object/String/whatever, which then will be emitted under `name` in the results object.
+In addition, `fn` is bound to the object containing the parsed data of the current chunk.
 
 The example above written using `next`:
 

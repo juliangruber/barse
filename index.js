@@ -40,7 +40,7 @@ Parser.prototype._transform = function (chunk, encoding, done) {
           break;
         }
 
-        this.res[step.name] = step.fn(chunk, this.offset);
+        this.res[step.name] = step.fn.apply(this.res, [chunk, this.offset]);
         this.offset += stepLength;
         this.idx++;
 
@@ -83,37 +83,32 @@ Parser.prototype.next = function (name, length, fn) {
 };
 
 Parser.prototype.loop = function (name, length, fn) {
-  var self = this;
-
-  function newFn (chunk, offset) {
-    // let `fn` create the parser
-    var parse = Parser();
-    fn(parse);
-
-    // parse.on('data') fires synchronously
-    var res = [];
-    parse.on('data', function (data) {
-      res.push(data);
-    });
-
-    // iterations * chunkLength
-    length = step.length * parse.chunkLength();
-
-    // write to the parser
-    var buf = new Buffer(length);
-    chunk.copy(buf, 0, offset, offset + length);
-    parse.write(buf);
-
-    return res;
-  }
-
-  var step = {
+  this.steps.push({
     name : name,
     length : length, // if string, will be fixed in _transform
-    fn : newFn
-  };
+    fn : function (chunk, offset) {
+      // let `fn` create the parser
+      var parse = Parser();
+      fn(parse);
 
-  this.steps.push(step);
+      // parse.on('data') fires synchronously
+      var res = [];
+      parse.on('data', function (data) {
+        res.push(data);
+      });
+
+      // iterations * chunkLength
+      if (typeof length === 'string') length = this[length];
+      length = length * parse.chunkLength();
+
+      // write to the parser
+      var buf = new Buffer(length);
+      chunk.copy(buf, 0, offset, offset + length);
+      parse.write(buf);
+
+      return res;
+    }
+  });
   return this;
 }
 
@@ -131,7 +126,7 @@ Parser.prototype.string = function (name, length, encoding) {
   if (!encoding) encoding = 'utf8';
   var self = this;
   return self.next(name, length, function (chunk, offset) {
-    if (typeof length === 'string') length = self.res[length];
+    if (typeof length === 'string') length = this[length];
     return chunk.toString(encoding, offset, offset + length);
   });
 };
@@ -139,7 +134,7 @@ Parser.prototype.string = function (name, length, encoding) {
 Parser.prototype.buffer = function (name, length) {
   var self = this;
   return self.next(name, length, function (chunk, offset) {
-    if (typeof length === 'string') length = self.res[length];
+    if (typeof length === 'string') length = this[length];
     var buf = new Buffer(length);
     chunk.copy(buf, 0, offset, offset + length);
     return buf;
