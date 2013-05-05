@@ -1,0 +1,32 @@
+{
+  "name": "barse",
+  "description": "Binary parser with a fluent api",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/juliangruber/barse.git"
+  },
+  "homepage": "https://github.com/juliangruber/barse",
+  "main": "index.js",
+  "scripts": {
+    "test": "tape test/*.js"
+  },
+  "dependencies": {
+    "readable-stream": "~1.0.2"
+  },
+  "devDependencies": {
+    "tape": "~1.0.1"
+  },
+  "keywords": [
+    "binary",
+    "parser",
+    "parse",
+    "fluent"
+  ],
+  "author": {
+    "name": "Julian Gruber",
+    "email": "mail@juliangruber.com",
+    "url": "http://juliangruber.com"
+  },
+  "license": "MIT"
+}
