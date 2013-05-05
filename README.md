@@ -9,12 +9,8 @@ Binary parser with a fluent API.
 var parse = require('barse');
 
 var parser = parse()
-  .next('foo', 3, function (chunk, offset) {
-    return chunk.toString('utf8', offset, offset + 3);
-  })
-  .next('bar', 3, function (chunk, offset) {
-    return chunk.toString('utf8', offset, offset + 3);
-  });
+  .string('foo', 3)
+  .string('bar', 3)
 
 parser.on('data', console.log);
 // => { foo : foo, bar : bar }
@@ -30,11 +26,31 @@ parser.write(new Buffer('ar'));
 
 Create a new streaming parser.
 
+### parse#string(name, length)
+### parse#buffer(name, length)
+### parse#read(U)Int{8,16,32}{BE,LE}(name)
+### parse#read{Float,Double}{BE,LE}(name)
+
+Parse the given type with optional length and store in the results object under
+`name`.
+
 ### parse#next(name, length, fn)
 
 Consume a chunk of binary data with the given `length`.
 
 `fn` is called with the current `chunk` and `offset` and is expected to synchronously return the parsed Object/String/whatever, which then will be emitted under `name` in the results object.
+
+The example above written using `next`:
+
+```js
+parse()
+  .next('foo', 3, function (chunk, offset) {
+    return chunk.toString('utf8', offset, offset + 3);
+  })
+  .next('bar', 3, function (chunk, offset) {
+    return chunk.toString('utf8', offset, offset + 3);
+  })
+```
 
 ## Installation
 
