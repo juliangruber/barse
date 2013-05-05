@@ -45,7 +45,7 @@ Parser.prototype._transform = function (chunk, encoding, done) {
         this.idx++;
 
         if (this.steps[i+1] && typeof this.steps[i+1].length === 'string') {
-          this.steps[i+1].length = this.res[step.name];
+          this.steps[i+1].length = this.res[this.steps[i+1].length];
         }
       }
 
