@@ -5,6 +5,8 @@ Binary parser with a fluent API.
 
 [![build status](https://secure.travis-ci.org/juliangruber/barse.png)](http://travis-ci.org/juliangruber/barse)
 
+[![testling badge](https://ci.testling.com/juliangruber/barse.png)](https://ci.testling.com/juliangruber/barse)
+
 ## Usage
 
 ```js
