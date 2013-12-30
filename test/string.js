@@ -27,7 +27,6 @@ test('variable string lengths', function (t) {
   buf2.writeUInt8(4, 0);
   buf2.write('abcd', 1);
   buf2.write('efgh', 5);
-  console.log(buf2);
 
   parser.write(buf);
   parser.write(buf2);
