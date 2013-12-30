@@ -43,10 +43,6 @@ Parser.prototype._transform = function (chunk, encoding, done) {
         this.res[step.name] = step.fn.apply(this.res, [chunk, this.offset]);
         this.offset += stepLength;
         this.idx++;
-
-        if (this.steps[i+1] && typeof this.steps[i+1].length === 'string') {
-          this.steps[i+1].length = this.res[this.steps[i+1].length];
-        }
       }
 
       if (i === this.steps.length - 1) {
@@ -126,17 +122,17 @@ Parser.prototype.string = function (name, length, encoding) {
   if (!encoding) encoding = 'utf8';
   var self = this;
   return self.next(name, length, function (chunk, offset) {
-    if (typeof length === 'string') length = this[length];
-    return chunk.toString(encoding, offset, offset + length);
+    var len = (typeof length === 'string') ? this[length] : length;
+    return chunk.toString(encoding, offset, offset + len);
   });
 };
 
 Parser.prototype.buffer = function (name, length) {
   var self = this;
   return self.next(name, length, function (chunk, offset) {
-    if (typeof length === 'string') length = this[length];
-    var buf = new Buffer(length);
-    chunk.copy(buf, 0, offset, offset + length);
+    var len = (typeof length === 'string') ? this[length] : length;
+    var buf = new Buffer(len);
+    chunk.copy(buf, 0, offset, offset + len);
     return buf;
   });
 };
