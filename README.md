@@ -1,4 +1,3 @@
-
 # barse
 
 Binary parser with a fluent API.
@@ -87,9 +86,9 @@ parse()
   })
 ```
 
-### parse#loop(name, length, fn)
+### parse#loop(name, iterations, fn)
 
-Read `length` buffers and store under `name`.
+Read `iterations` buffers and store under `name`.
 
 ```js
 var parser = parse()
