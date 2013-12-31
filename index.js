@@ -56,9 +56,19 @@ Parser.prototype._transform = function (chunk, encoding, done) {
     for (var i = 0; i < this.steps.length; i++) {
       var step = this.steps[i];
       if (this.idx == i) {
-        var stepLength = typeof step.length === 'number'
-          ? step.length
-          : this.res[step.length];
+        var stepLength;
+        
+        if (typeof step.length === 'number') {
+          stepLength = step.length;
+        } else if (typeof step.length === 'string') {
+          stepLength = this.res[step.length];
+        } else if (typeof step.chunkLength == 'number') {
+          if (typeof step.iterations === 'number') {
+            stepLength = step.iterations * step.chunkLength;
+          } else if (typeof step.iterations === 'string') {
+            stepLength = this.res[step.iterations] * step.chunkLength;
+          }
+        }
 
         if (chunk.length < stepLength + this.offset) {
           broken = true;
@@ -116,9 +126,15 @@ Parser.prototype.next = function (name, length, fn) {
  */
 
 Parser.prototype.loop = function (name, length, fn) {
+  // Get static chunk length
+  var parse = Parser();
+  fn(parse);
+  var chunkLength = parse.chunkLength();
+  
   this.steps.push({
     name : name,
-    length : length, // if string, will be fixed in _transform
+    iterations : length,
+    chunkLength : chunkLength,
     fn : function (chunk, offset) {
       // let `fn` add parsing rules
       var parse = Parser();
