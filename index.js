@@ -1,8 +1,24 @@
+
+/**
+ * Module dependencies.
+ */
+
 var Buffer = require('buffer').Buffer;
 var inherits = require('util').inherits;
 var Transform = require('readable-stream').Transform;
 
+/**
+ * Expose `Parser`.
+ */
+
 module.exports = Parser;
+
+/**
+ * Create a new `Parser`.
+ *
+ * @return {Parser}
+ * @api public
+ */
 
 function Parser () {
   if (!(this instanceof Parser)) return new Parser();
@@ -19,6 +35,15 @@ function Parser () {
 }
 
 inherits(Parser, Transform);
+
+/**
+ * Transform callback.
+ *
+ * @param {Buffer} chunk
+ * @param {String} encoding
+ * @param {Function} done
+ * @api private
+ */
 
 Parser.prototype._transform = function (chunk, encoding, done) {
   if (this.buf) {
@@ -69,8 +94,10 @@ Parser.prototype._transform = function (chunk, encoding, done) {
  * Register a parser function.
  *
  * @param {String} name
- * @param {Number} length
+ * @param {Number|String} length
  * @param {Function} fn
+ * @return {Parser}
+ * @api public
  */
 
 Parser.prototype.next = function (name, length, fn) {
@@ -78,12 +105,22 @@ Parser.prototype.next = function (name, length, fn) {
   return this;
 };
 
+/**
+ * Loop `length` times and save in `name` what `fn` registers.
+ *
+ * @param {String} name
+ * @param {Number|String} length
+ * @param {Function} fn
+ * @return {Parser}
+ * @api public
+ */
+
 Parser.prototype.loop = function (name, length, fn) {
   this.steps.push({
     name : name,
     length : length, // if string, will be fixed in _transform
     fn : function (chunk, offset) {
-      // let `fn` create the parser
+      // let `fn` add parsing rules
       var parse = Parser();
       fn(parse);
 
@@ -107,6 +144,13 @@ Parser.prototype.loop = function (name, length, fn) {
   });
   return this;
 }
+
+/**
+ * Get the byte length of all steps together.
+ *
+ * @return {Number}
+ * @api private
+ */
 
 Parser.prototype.chunkLength = function () {
   return this.steps.reduce(function (acc, step) {
